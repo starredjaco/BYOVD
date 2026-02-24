@@ -39,6 +39,7 @@ BYOVD/
 │   └── src/lib.rs
 ├── BdApiUtil-Killer/                  # Uses byovd-lib
 ├── CcProtectt-Killer/                 # Uses byovd-lib
+├── GameDriverX64-Killer/              # Uses byovd-lib
 ├── K7Terminator/                      # Standalone (LPE + BYOVD modes)
 ├── Ksapi64-Killer/                    # Uses byovd-lib
 ├── NSec-Killer/                       # Uses byovd-lib
