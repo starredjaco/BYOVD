@@ -7,7 +7,7 @@
 - Original repo [https://github.com/j3h4ck/PoisonKiller](https://github.com/j3h4ck/PoisonKiller)
 - PoisonX.sys SHA256: `a5035cbd6c31616288aa66d98e5a25441ee38651fb5f330676319f921bb816a4`
 
-Built on [`byovd-lib`](../byovd-lib/) -- implements the `DriverConfig` trait and delegates the full BYOVD flow to the shared library. Note: this driver reports an error even on successful termination, so `ignore_ioctl_error` is enabled.
+Built on [`byovd-lib`](../byovd-lib/) -- implements the `DriverConfig` trait and delegates the full BYOVD flow to the shared library. 
 
 ## Usage
 
