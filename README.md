@@ -43,6 +43,7 @@ BYOVD/
 ├── K7Terminator/                      # Standalone (LPE + BYOVD modes)
 ├── Ksapi64-Killer/                    # Uses byovd-lib
 ├── NSec-Killer/                       # Uses byovd-lib
+├── PoisonX-Killer/                    # Uses byovd-lib
 ├── STProcessMonitor-Killer/           # Uses byovd-lib (combined v114 + v2618)
 ├── TfSysMon-Killer/                   # Uses byovd-lib
 ├── Viragt64-Killer/                   # Uses byovd-lib
@@ -125,6 +126,7 @@ Below are the drivers and their respective PoCs available in this repository:
 - **[K7Terminator](https://github.com/BlackSnufkin/BYOVD/tree/main/K7Terminator)**: Targets `K7RKScan.sys` from `K7 Computing` (CVE-2025-52915, CVE-2025-1055) -- [Full write-up](https://blacksnufkin.github.io/posts/BYOVD-CVE-2025-52915/).
 - **[Ksapi64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Ksapi64-Killer)**: Targets `ksapi64.sys` / `ksapi64_del.sys` from `Kingsoft Corporation`.
 - **[NSec-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/NSec-Killer)**: Targets `NSecKrnl.sys` from `NSEC` (ValleyRAT BYOVD reproduction).
+- **[PoisonX-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/PoisonX-Killer)**: Target `PoisonX.sys` from `Microsoft` ([@j3h4ck](https://github.com/j3h4ck/PoisonKiller/) reproduction)
 - **[STProcessMonitor-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/STProcessMonitor-Killer)**: Targets `STProcessMonitor.sys` from `Safetica` (CVE-2025-70795, supports v11.11.4 and v11.26.18).
 - **[TfSysMon-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/TfSysMon-Killer)**: Targets `sysmon.sys` from `ThreatFire System Monitor`.
 - **[Viragt64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Viragt64-Killer)**: Targets `viragt64.sys` from `Tg Soft`.
