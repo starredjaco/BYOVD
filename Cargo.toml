@@ -4,6 +4,7 @@ members = [
     "BdApiUtil-Killer",
     "CcProtect-Killer",
     "GameDriverX64-Killer",
+    "GoFlyDrv-Killer",
     "K7Terminator",
     "Ksapi64-Killer",
     "NSec-Killer",
