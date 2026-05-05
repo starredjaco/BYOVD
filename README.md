@@ -30,26 +30,43 @@ This repository contains several PoCs developed for educational purposes, helpin
 
 ## 🏗️ Project Structure
 
-The project is organized as a **Rust Cargo workspace**. All PoCs share a common library (`byovd-lib`) that handles the boilerplate: driver service lifecycle, IOCTL dispatch, process monitoring, and cleanup. Each killer is a thin binary (~50-100 lines) that only defines its driver-specific configuration.
+The project is organized as a **Rust Cargo workspace**. All PoCs (except K7Terminator) share a common library (`byovd-lib`) that handles the boilerplate: driver service lifecycle, IOCTL dispatch, process monitoring, privilege adjustment, and cleanup. Each killer is a thin binary (~50-100 lines) that only defines its driver-specific configuration.
 
 ```
 BYOVD/
-├── Cargo.toml                        # Workspace root
-├── byovd-lib/                        # Shared library
-│   └── src/lib.rs
-├── BdApiUtil-Killer/                  # Uses byovd-lib
-├── CcProtectt-Killer/                 # Uses byovd-lib
-├── GameDriverX64-Killer/              # Uses byovd-lib
-├── GoFlyDrv-Killer/                   # Uses byovd-lib
-├── K7Terminator/                      # Standalone (LPE + BYOVD modes)
-├── Ksapi64-Killer/                    # Uses byovd-lib
-├── NSec-Killer/                       # Uses byovd-lib
-├── PoisonX-Killer/                    # Uses byovd-lib
-├── STProcessMonitor-Killer/           # Uses byovd-lib (combined v114 + v2618)
-├── TfSysMon-Killer/                   # Uses byovd-lib
-├── Viragt64-Killer/                   # Uses byovd-lib
-└── Wsftprm-Killer/                    # Uses byovd-lib
+├── Cargo.toml                       # Workspace root (deps + release profile)
+├── Cargo.lock
+├── README.md
+├── LICENSE
+│
+├── byovd-lib/                       # Shared library
+│   ├── Cargo.toml
+│   └── src/
+│       ├── lib.rs                   # DriverConfig trait + run() / send_ioctl() / run_monitor()
+│       ├── service.rs               # ByovdDriver -- SCM lifecycle (install/start/stop_and_delete)
+│       ├── device.rs                # DeviceHandle -- 5 typed IOCTL dispatch shapes
+│       ├── handle.rs                # WinHandle / ScHandle -- RAII handle wrappers (Send + Sync)
+│       ├── process.rs               # find_pid_by_name / find_all_pids_by_name
+│       ├── monitor.rs               # run_monitor_loop (closure-based) + setup_ctrlc_handler
+│       ├── privilege.rs             # enable_privilege / ensure_running_as_local_system
+│       └── util.rs                  # to_wstring / to_cstring / get_current_dir
+│
+├── BdApiUtil-Killer/                # Baidu BdApiUtil64 (CVE-2024-51324)
+├── CcProtect-Killer/                # CnCrypt CcProtect
+├── GameDriverX64-Killer/            # Fedeen GameDriverX64 (CVE-2025-61155)
+├── GoFlyDrv-Killer/                 # Golink GoFlyDrv
+├── K7Terminator/                    # K7 RKScan -- standalone, LPE + BYOVD modes
+├── Ksapi64-Killer/                  # Kingsoft ksapi64
+├── NSec-Killer/                     # NSEC NSecKrnl (ValleyRAT BYOVD reproduction)
+├── PoisonX-Killer/                  # Microsoft PoisonX (j3h4ck reproduction)
+├── STProcessMonitor-Killer/         # Safetica STProcessMonitor (CVE-2025-70795, v114 + v2618)
+├── TfSysMon-Killer/                 # ThreatFire sysmon
+├── UnknownKiller/                   # unattributed unknown.sys
+├── Viragt64-Killer/                 # Tg Soft viragt64
+└── Wsftprm-Killer/                  # Topaz wsftprm (CVE-2023-52271)
 ```
+
+Each `*-Killer/` directory contains its own `Cargo.toml`, `src/main.rs` (the `DriverConfig` impl + CLI), `README.md` (driver hashes + usage), and the matching `.sys` file the binary loads at runtime.
 
 ## 🔧 Building
 
@@ -70,17 +87,25 @@ Binaries are output to `target/release/`. Copy the corresponding `.sys` driver f
 
 ## 📦 byovd-lib
 
-`byovd-lib` is the shared library that all PoCs (except K7Terminator) are built on. It provides:
+`byovd-lib` is the shared library that all PoCs (except K7Terminator) are built on. It exposes **two complementary APIs** -- a high-level declarative one for the standard "install driver, kill on sight, clean up" flow, and a low-level imperative one for killers that need a custom flow (attach to an already-loaded driver, fan out to multiple PIDs, structured IOCTL buffers, custom retry logic, etc.). Both can be mixed in the same binary.
 
-- **`DriverConfig` trait** -- each PoC implements this to define its driver name, `.sys` filename, device path, IOCTL code, and input buffer format.
-- **`DriverManager`** -- RAII-based service lifecycle management (create, start, stop, delete).
-- **`ServiceHandle` / `FileHandle`** -- RAII wrappers that auto-close Windows handles on drop.
-- **`send_ioctl()`** -- opens the driver device and dispatches the kill IOCTL.
-- **`run_monitor()`** -- continuously scans for the target process by name and sends the kill IOCTL when found (Ctrl+C to stop).
-- **`run()`** -- the full BYOVD flow: preflight checks, load driver, monitor & kill, cleanup.
-- **Helpers** -- `get_pid_by_name()`, `ensure_running_as_local_system()`, `to_wstring()`.
+### Module layout
 
-Adding a new driver PoC is straightforward -- implement the trait and call `byovd_lib::run()`:
+```
+byovd-lib/src/
+├── lib.rs        # DriverConfig trait + run() / send_ioctl() / run_monitor()
+├── service.rs    # ByovdDriver -- SCM lifecycle (install, start, stop_and_delete)
+├── device.rs     # DeviceHandle -- typed IOCTL dispatch (5 shapes)
+├── handle.rs     # WinHandle / ScHandle -- RAII handle wrappers (Send + Sync)
+├── process.rs    # find_pid_by_name / find_all_pids_by_name
+├── monitor.rs    # run_monitor_loop (closure-based) + setup_ctrlc_handler
+├── privilege.rs  # enable_privilege / ensure_running_as_local_system
+└── util.rs       # to_wstring / to_cstring / get_current_dir
+```
+
+### High-level API: `DriverConfig` trait + `run()`
+
+This is what the bundled killers use. Implement the trait, call `byovd_lib::run()`, done.
 
 ```rust
 use byovd_lib::{DriverConfig, Result};
@@ -109,15 +134,72 @@ fn main() -> Result<()> {
 }
 ```
 
+`run()` does: `preflight_check` → install service (`SERVICE_DEMAND_START`) → `StartService` → kill-on-sight monitor (Ctrl+C to exit) → stop + delete service.
+
 Optional trait overrides with their defaults:
 
 | Method | Default | Purpose |
 |---|---|---|
 | `device_access()` | `SERVICE_ALL_ACCESS` | `CreateFileW` access flags |
-| `skip_unload()` | `false` | Skip driver cleanup (e.g., drivers that BSOD on unload) |
-| `ignore_ioctl_error()` | `false` | Treat IOCTL failure as success (e.g., NSecKrnl) |
-| `ioctl_output_size()` | `0` | Expected output buffer size |
-| `preflight_check()` | `Ok(())` | Pre-launch validation (e.g., LocalSystem check) |
+| `skip_unload()` | `false` | Skip driver cleanup (e.g. drivers that BSOD on unload) |
+| `ignore_ioctl_error()` | `false` | Treat IOCTL failure as success (e.g. NSecKrnl reports error on success) |
+| `ioctl_output_size()` | `0` | Expected output buffer size in bytes |
+| `preflight_check()` | `Ok(())` | Pre-launch validation (e.g. LocalSystem check) |
+
+### Low-level API: imperative pieces
+
+When the trait flow doesn't fit -- e.g. the driver is already loaded and you only want to fire one IOCTL, you need a custom retry policy, the IOCTL takes a structured input rather than just a PID, or you want to fan out across all matching PIDs -- compose the lower-level pieces directly.
+
+**Driver lifecycle** -- `ByovdDriver`:
+
+```rust
+use byovd_lib::ByovdDriver;
+
+let driver = ByovdDriver::new("MyDriver", "mydriver.sys", "\\\\.\\MyDevice")?;
+driver.start()?;                       // ERROR_SERVICE_ALREADY_RUNNING is OK
+let device = driver.open_device()?;    // returns DeviceHandle
+// ... send IOCTLs ...
+driver.stop_and_delete()?;
+```
+
+**IOCTL dispatch** -- `DeviceHandle` exposes five typed shapes:
+
+| Method | Use when |
+|---|---|
+| `ioctl<I, O>(code, &input, &mut output)` | Both input and output buffers, separate types |
+| `ioctl_inout<T>(code, &mut data)` | Same buffer for input + output |
+| `ioctl_in<I>(code, &input)` | Input only, no output buffer |
+| `ioctl_in_unchecked<I>(code, &input)` | Input only, ignore failure (per-call alternative to `ignore_ioctl_error`) |
+| `ioctl_raw(code, in_ptr, in_size, out_ptr, out_size)` | Raw pointer escape hatch |
+
+The typed forms remove the manual `to_ne_bytes()` / `extend_from_slice()` boilerplate when the IOCTL takes a struct (e.g. `{ pid: u32, padding: [u8; 20] }`).
+
+**Process lookup** -- `find_pid_by_name(name)` (first match) and `find_all_pids_by_name(name)` (all matches, excludes system PIDs ≤ 4).
+
+**Custom monitor loop** -- `run_monitor_loop(name, interval, |pid| ...)` takes a closure so you can do whatever you want per match (multiple IOCTLs, structured logging, fan-out across PIDs, retry on error).
+
+**Privileges** -- `enable_privilege("SeDebugPrivilege")` / `enable_privilege("SeLoadDriverPrivilege")` for drivers that require explicit token privileges. `ensure_running_as_local_system()` returns an error if the process is not running as `S-1-5-18`.
+
+**Handle wrappers** -- `WinHandle` (auto-`CloseHandle`) and `ScHandle` (auto-`CloseServiceHandle`) are `Send + Sync` and can be moved across threads.
+
+### Example: attach to an already-loaded driver, no service lifecycle
+
+This is what `UnknownKiller --attach` does -- skip SCM entirely, just open the device and fire the IOCTL once:
+
+```rust
+use byovd_lib::{find_pid_by_name, DeviceHandle, Result};
+
+fn main() -> Result<()> {
+    let device = DeviceHandle::open("\\\\.\\eb")?;
+    let pid = find_pid_by_name("notepad.exe").ok_or("not running")?;
+    device.ioctl_in(0x222024, &pid)?;   // typed: just pass &u32
+    Ok(())
+}
+```
+
+### Back-compat aliases
+
+`FileHandle` / `ServiceHandle` still resolve to `WinHandle` / `ScHandle`, and `get_pid_by_name` is kept as an alias for `find_pid_by_name`, so older code referencing those names keeps compiling.
 
 ## 💡 POCs
 Below are the drivers and their respective PoCs available in this repository:
@@ -132,6 +214,7 @@ Below are the drivers and their respective PoCs available in this repository:
 - **[PoisonX-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/PoisonX-Killer)**: Target `PoisonX.sys` from `Microsoft` ([@j3h4ck](https://github.com/j3h4ck/PoisonKiller/) reproduction)
 - **[STProcessMonitor-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/STProcessMonitor-Killer)**: Targets `STProcessMonitor.sys` from `Safetica` (CVE-2025-70795, supports v11.11.4 and v11.26.18).
 - **[TfSysMon-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/TfSysMon-Killer)**: Targets `sysmon.sys` from `ThreatFire System Monitor`.
+- **[UnknownKiller](https://github.com/BlackSnufkin/BYOVD/tree/main/UnknownKiller)**: Targets `unknown.sys` from an unattributed vendor (driver origin TBD).
 - **[Viragt64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Viragt64-Killer)**: Targets `viragt64.sys` from `Tg Soft`.
 - **[Wsftprm-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Wsftprm-Killer)**: Targets `wsftprm.sys` from `Topaz Antifraud` (CVE-2023-52271).
 
