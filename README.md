@@ -63,7 +63,8 @@ BYOVD/
 ├── TfSysMon-Killer/                 # ThreatFire sysmon
 ├── UnknownKiller/                   # unattributed unknown.sys
 ├── Viragt64-Killer/                 # Tg Soft viragt64
-└── Wsftprm-Killer/                  # Topaz wsftprm (CVE-2023-52271)
+├── Wsftprm-Killer/                  # Topaz wsftprm (CVE-2023-52271)
+└── Xkpsm-Killer/                    # JiranJikyosoft X-Keeper xkpsm
 ```
 
 Each `*-Killer/` directory contains its own `Cargo.toml`, `src/main.rs` (the `DriverConfig` impl + CLI), `README.md` (driver hashes + usage), and the matching `.sys` file the binary loads at runtime.
@@ -217,6 +218,7 @@ Below are the drivers and their respective PoCs available in this repository:
 - **[UnknownKiller](https://github.com/BlackSnufkin/BYOVD/tree/main/UnknownKiller)**: Targets `unknown.sys` from an unattributed vendor (driver origin TBD).
 - **[Viragt64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Viragt64-Killer)**: Targets `viragt64.sys` from `Tg Soft`.
 - **[Wsftprm-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Wsftprm-Killer)**: Targets `wsftprm.sys` from `Topaz Antifraud` (CVE-2023-52271).
+- **[Xkpsm-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Xkpsm-Killer)**: Targets `xkpsm.sys` from `JiranJikyosoft X-Keeper`.
 
 ## 🔬 Complete Driver Reverse Engineering Process (x64)
 

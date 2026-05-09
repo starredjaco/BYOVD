@@ -14,6 +14,7 @@ members = [
     "UnknownKiller",
     "Viragt64-Killer",
     "Wsftprm-Killer",
+    "Xkpsm-Killer",
 ]
 resolver = "2"
 
