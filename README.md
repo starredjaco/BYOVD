@@ -30,7 +30,7 @@ This repository contains several PoCs developed for educational purposes, helpin
 
 ## 🏗️ Project Structure
 
-The project is organized as a **Rust Cargo workspace**. Most PoCs share a common library (`byovd-lib`) that handles the boilerplate: driver service lifecycle, IOCTL dispatch, process monitoring, privilege adjustment, and cleanup. Each killer is a thin binary (~50-100 lines) that only defines its driver-specific configuration. **`K7Terminator`, `Astra64-RW`, and `Xhunter1-Killer` are standalone** — they have their own `[workspace]` declarations and are built directly from their own directories, not via the root workspace.
+The project is organized as a **Rust Cargo workspace**. Most PoCs share a common library (`byovd-lib`) that handles the boilerplate: driver service lifecycle, IOCTL dispatch, process monitoring, privilege adjustment, and cleanup. Each killer is a thin binary (~50-100 lines) that only defines its driver-specific configuration. **`K7Terminator`, `Astra64-Killer`, and `Xhunter1-Killer` are standalone** — they have their own `[workspace]` declarations and are built directly from their own directories, not via the root workspace.
 
 ```
 BYOVD/
@@ -52,15 +52,17 @@ BYOVD/
 │       └── util.rs                  # to_wstring / to_cstring / get_current_dir
 │
 ├── AppRemover-Killer/               # OPSWAT AppRemover ardrv.sys
-├── Astra64-RW/                      # EnTech Astra32 / TVicHW astra64.sys -- standalone, kernel R/W demo (Shadow SSDT hijack -> SYSTEM)
+├── Astra64-Killer/                   # EnTech Astra32 / TVicHW astra64.sys -- standalone, data-only Shadow SSDT hijack EDR killer
 ├── BdApiUtil-Killer/                # Baidu BdApiUtil64 (CVE-2024-51324)
 ├── CcProtect-Killer/                # CnCrypt CcProtect
 ├── EnPortv-Killer/                  # EnCase EnPortv
 ├── GameDriverX64-Killer/            # Fedeen GameDriverX64 (CVE-2025-61155)
 ├── GoFlyDrv-Killer/                 # Golink GoFlyDrv
+├── HNOs2Ec-Killer/                  # HONOR PCManager HNOs2Ec.sys
 ├── HWAudioOs2Ec-Killer/             # Huawei Audio driver HWAudioOs2Ec.sys
 ├── K7Terminator/                    # K7 RKScan -- standalone, LPE + BYOVD modes
 ├── Ksapi64-Killer/                  # Kingsoft ksapi64
+├── MonProcess-Killer/               # HONOR HnRSMService MonProcess.sys
 ├── MonProcessEX-Killer/             # HONOR MagicAnimation and HONOR PCManager MonProcessEX.sys
 ├── NSec-Killer/                     # NSEC NSecKrnl (ValleyRAT BYOVD reproduction)
 ├── PCTcore64-Killer/                # PC Tools PCTcore64 (CVE-2026-8501)
@@ -213,15 +215,17 @@ fn main() -> Result<()> {
 Below are the drivers and their respective PoCs available in this repository:
 
 - **[AppRemover-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/AppRemover-Killer)**: Targets `ardrv.sys` from `OPSWAT AppRemover`.
-- **[Astra64-RW](https://github.com/BlackSnufkin/BYOVD/tree/main/Astra64-RW)**: Targets `astra64.sys` from `EnTech Taiwan` (Astra32 / TVicHW) -- standalone kernel R/W PoC.
+- **[Astra64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Astra64-Killer)**: Targets `astra64.sys` from `EnTech Taiwan` (Astra32 / TVicHW) -- standalone data-only Shadow SSDT hijack EDR killer.
 - **[BdApiUtil-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/BdApiUtil-Killer)**: Targets `BdApiUtil64.sys` from `Baidu AntiVirus` (CVE-2024-51324).
 - **[CcProtect-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/CcProtect-Killer)**: Targets `CcProtect.sys` from `CnCrypt`.
 - **[EnPortv-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/EnPortv-Killer)**: Targets `EnPortv.sys` from `Guidance EnCase`.
 - **[GameDriverX64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/GameDriverX64-Killer)**: Targets `GameDriverX64.sys` from `Fedeen Games` (CVE-2025-61155).
 - **[GoFlyDrv-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/GoFlyDrv-Killer)**: Targets `GoFlyDrv.sys` from `Golink`.
+- **[HNOs2Ec-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/HNOs2Ec-Killer)**: Targets `HNOs2Ec.sys` from `HONOR` (PCManager).
 - **[HWAudioOs2Ec-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/HWAudioOs2Ec-Killer)**: Targets `HWAudioOs2Ec.sys` from `Huawei`.
 - **[K7Terminator](https://github.com/BlackSnufkin/BYOVD/tree/main/K7Terminator)**: Targets `K7RKScan.sys` from `K7 Computing` (CVE-2025-52915, CVE-2025-1055) -- [Full write-up](https://blacksnufkin.github.io/posts/BYOVD-CVE-2025-52915/).
 - **[Ksapi64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Ksapi64-Killer)**: Targets `ksapi64.sys` / `ksapi64_del.sys` from `Kingsoft Corporation`.
+- **[MonProcess-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/MonProcess-Killer)**: Targets `MonProcess.sys` from `HONOR` (HnRSMService).
 - **[MonProcessEX-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/MonProcessEX-Killer)**: Targets `MonProcessEX.sys` from `HONOR`.
 - **[NSec-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/NSec-Killer)**: Targets `NSecKrnl.sys` from `NSEC` (ValleyRAT BYOVD reproduction).
 - **[PCTcore64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/PCTcore64-Killer)**: Targets `PCTcore64.sys` from `PC Tools` (CVE-2026-8501).
