@@ -30,7 +30,7 @@ This repository contains several PoCs developed for educational purposes, helpin
 
 ## 🏗️ Project Structure
 
-The project is organized as a **Rust Cargo workspace**. Most PoCs share a common library (`byovd-lib`) that handles the boilerplate: driver service lifecycle, IOCTL dispatch, process monitoring, privilege adjustment, and cleanup. Each killer is a thin binary (~50-100 lines) that only defines its driver-specific configuration. **`K7Terminator`, `Astra64-Killer`, and `Xhunter1-Killer` are standalone** — they have their own `[workspace]` declarations and are built directly from their own directories, not via the root workspace.
+The project is organized as a **Rust Cargo workspace**. Most PoCs share a common library (`byovd-lib`) that handles the boilerplate: driver service lifecycle, IOCTL dispatch, process monitoring, privilege adjustment, and cleanup. Each killer is a thin binary (~50-100 lines) that only defines its driver-specific configuration. **`K7Terminator`, `Astra64-Killer`, `Ktapi-Killer`, and `Xhunter1-Killer` are standalone** — they have their own `[workspace]` declarations and are built directly from their own directories, not via the root workspace.
 
 ```
 BYOVD/
@@ -62,6 +62,7 @@ BYOVD/
 ├── HWAudioOs2Ec-Killer/             # Huawei Audio driver HWAudioOs2Ec.sys
 ├── K7Terminator/                    # K7 RKScan -- standalone, LPE + BYOVD modes
 ├── Ksapi64-Killer/                  # Kingsoft ksapi64
+├── Ktapi-Killer/                    # Kontron ktapi.sys -- standalone, two-stage shellcode EDR killer
 ├── MonProcess-Killer/               # HONOR HnRSMService MonProcess.sys
 ├── MonProcessEX-Killer/             # HONOR MagicAnimation and HONOR PCManager MonProcessEX.sys
 ├── NSec-Killer/                     # NSEC NSecKrnl (ValleyRAT BYOVD reproduction)
@@ -225,6 +226,7 @@ Below are the drivers and their respective PoCs available in this repository:
 - **[HWAudioOs2Ec-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/HWAudioOs2Ec-Killer)**: Targets `HWAudioOs2Ec.sys` from `Huawei`.
 - **[K7Terminator](https://github.com/BlackSnufkin/BYOVD/tree/main/K7Terminator)**: Targets `K7RKScan.sys` from `K7 Computing` (CVE-2025-52915, CVE-2025-1055) -- [Full write-up](https://blacksnufkin.github.io/posts/BYOVD-CVE-2025-52915/).
 - **[Ksapi64-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Ksapi64-Killer)**: Targets `ksapi64.sys` / `ksapi64_del.sys` from `Kingsoft Corporation`.
+- **[Ktapi-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/Ktapi-Killer)**: Targets `ktapi.sys` from `Kontron` -- standalone two-stage shellcode EDR killer.
 - **[MonProcess-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/MonProcess-Killer)**: Targets `MonProcess.sys` from `HONOR` (HnRSMService).
 - **[MonProcessEX-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/MonProcessEX-Killer)**: Targets `MonProcessEX.sys` from `HONOR`.
 - **[NSec-Killer](https://github.com/BlackSnufkin/BYOVD/tree/main/NSec-Killer)**: Targets `NSecKrnl.sys` from `NSEC` (ValleyRAT BYOVD reproduction).
